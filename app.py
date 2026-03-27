@@ -2,19 +2,29 @@ import os
 from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'KIFARU_ESTATE_2026')
 
-# Render-Safe Database Path
+# --- CONFIGURATION ---
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'kifaru_real_estate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# File Upload Configuration
+UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True) # Creates the folder if it doesn't exist
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- MODELS ---
 class User(UserMixin, db.Model):
@@ -28,7 +38,8 @@ class Property(db.Model):
     location = db.Column(db.String(100)) 
     title = db.Column(db.String(150))
     price = db.Column(db.Float)
-    bedrooms = db.Column(db.Integer, default=0) # NEW FIELD
+    bedrooms = db.Column(db.Integer, default=0)
+    available_plots = db.Column(db.String(300), default="") # NEW: Plot Manager Field
     features = db.Column(db.String(200)) 
     image_url = db.Column(db.String(500))
     status = db.Column(db.String(20), default='Available') 
@@ -48,7 +59,7 @@ def load_user(id): return User.query.get(int(id))
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
-        db.session.add(User(username='admin', password='kifaru2026')) # Default login
+        db.session.add(User(username='admin', password='kifaru2026'))
         db.session.commit()
 
 # --- ROUTES ---
@@ -94,6 +105,19 @@ def admin_dashboard():
 @login_required
 def save_property():
     p_id = request.form.get('property_id')
+    
+    # 1. Handle File Upload
+    image_file = request.files.get('image_file')
+    image_url = request.form.get('image_url') # Fallback if URL is pasted
+    
+    if image_file and allowed_file(image_file.filename):
+        filename = secure_filename(image_file.filename)
+        # Add timestamp to make filename unique
+        unique_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+        image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+        image_url = f"/static/uploads/{unique_filename}"
+
+    # 2. Save or Update Database
     if p_id: 
         p = Property.query.get(p_id)
         p.title = request.form.get('title')
@@ -101,17 +125,22 @@ def save_property():
         p.property_type = request.form.get('type')
         p.price = float(request.form.get('price'))
         p.bedrooms = int(request.form.get('bedrooms') or 0)
-        p.features = request.form.get('features')
-        p.image_url = request.form.get('image_url')
+        p.available_plots = request.form.get('available_plots', '')
+        if image_url: p.image_url = image_url # Only update image if a new one is provided
         p.status = request.form.get('status')
     else: 
         new_p = Property(
-            title=request.form.get('title'), location=request.form.get('location'), 
-            property_type=request.form.get('type'), price=float(request.form.get('price')), 
-            bedrooms=int(request.form.get('bedrooms') or 0), features=request.form.get('features'), 
-            image_url=request.form.get('image_url'), status=request.form.get('status')
+            title=request.form.get('title'), 
+            location=request.form.get('location'), 
+            property_type=request.form.get('type'), 
+            price=float(request.form.get('price')), 
+            bedrooms=int(request.form.get('bedrooms') or 0), 
+            available_plots=request.form.get('available_plots', ''),
+            image_url=image_url or "https://via.placeholder.com/600x400?text=No+Image", 
+            status=request.form.get('status')
         )
         db.session.add(new_p)
+    
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
