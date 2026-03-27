@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kifaru | Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; } .text-kifaru-green { color: #10B981; }</style>
+</head>
+<body class="bg-slate-50 p-6">
+    <div class="container mx-auto">
+        <div class="flex justify-between items-center mb-10 bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#10B981] rounded-lg flex items-center justify-center text-white font-black text-xl">K</div>
+                <div>
+                    <h1 class="text-xl font-black uppercase tracking-tight">Kifaru Dashboard</h1>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Agency Management Portal</p>
+                </div>
+            </div>
+            <div class="flex gap-6">
+                <a href="/" class="text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-widest transition">Live Site</a>
+                <a href="/logout" class="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest transition">Logout</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-black mb-8 border-b pb-4 uppercase tracking-tight">Active Portfolio</h2>
+                <div class="space-y-4">
+                    {% for p in properties %}
+                    <div class="p-6 bg-slate-50 rounded-2xl flex justify-between items-center border border-slate-100 hover:border-[#10B981] transition">
+                        <div>
+                            <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-md {{ 'bg-emerald-100 text-emerald-700' if p.status == 'Available' else 'bg-slate-200 text-slate-500' }} mb-2 inline-block tracking-widest">
+                                {{ p.status }}
+                            </span>
+                            <p class="font-bold text-sm text-slate-900">{{ p.title }}</p>
+                            <p class="text-[10px] font-semibold text-slate-500 mt-1 flex gap-3">
+                                <span>📍 {{ p.location }}</span>
+                                <span>🛏️ {{ p.bedrooms }} Beds</span>
+                                <span class="text-slate-800 font-bold">{{ "{:,.0f}".format(p.price) }} TZS</span>
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editProperty({{ p|tojson }})" class="bg-slate-200 text-slate-600 p-3 rounded-xl hover:bg-[#10B981] hover:text-white transition shadow-sm">✎</button>
+                            <form action="/admin/delete/{{ p.id }}" method="POST">
+                                <button class="bg-red-50 text-red-500 p-3 rounded-xl hover:bg-red-500 hover:text-white transition shadow-sm">🗑</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="form-container" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 h-fit sticky top-6">
+                <h2 id="form-title" class="text-lg font-black mb-8 border-b pb-4 uppercase tracking-tight">Add New Listing</h2>
+                <form action="/admin/save" method="POST" class="space-y-5">
+                    <input type="hidden" name="property_id" id="property_id">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Property Title</label>
+                            <input type="text" name="title" id="title" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Location</label>
+                            <input type="text" name="location" id="location" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Type</label>
+                            <input type="text" name="type" id="type" placeholder="e.g. House" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Bedrooms</label>
+                            <input type="number" name="bedrooms" id="bedrooms" placeholder="0 if plot" value="0" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Price (TZS)</label>
+                            <input type="number" name="price" id="price" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Status</label>
+                            <select name="status" id="status" class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                                <option value="Available">Available</option>
+                                <option value="Sold">Sold</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">Image URL</label>
+                            <input type="text" name="image_url" id="image_url" required class="w-full p-4 mt-1 bg-slate-50 rounded-xl border border-slate-200 outline-none text-sm font-semibold focus:border-[#10B981]">
+                        </div>
+                    </div>
+                    
+                    <button id="submit-btn" class="w-full bg-[#10B981] text-white py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-emerald-600 shadow-lg transition mt-4">Publish Listing</button>
+                    <button type="button" id="cancel-btn" onclick="resetForm()" class="hidden w-full text-slate-400 font-bold uppercase tracking-widest text-[9px] mt-3 hover:text-slate-600">Cancel Edit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editProperty(p) {
+            document.getElementById('form-title').innerText = "Update Listing";
+            document.getElementById('submit-btn').innerText = "Save Changes";
+            document.getElementById('cancel-btn').classList.remove('hidden');
+            
+            document.getElementById('property_id').value = p.id;
+            document.getElementById('title').value = p.title;
+            document.getElementById('location').value = p.location;
+            document.getElementById('type').value = p.property_type;
+            document.getElementById('bedrooms').value = p.bedrooms;
+            document.getElementById('price').value = p.price;
+            document.getElementById('status').value = p.status;
+            document.getElementById('image_url').value = p.image_url;
+
+            window.scrollTo({ top: document.getElementById('form-container').offsetTop - 50, behavior: 'smooth' });
+        }
+        function resetForm() {
+            document.getElementById('form-title').innerText = "Add New Listing";
+            document.getElementById('submit-btn').innerText = "Publish Listing";
+            document.getElementById('cancel-btn').classList.add('hidden');
+            document.getElementById('property_id').value = "";
+            document.querySelector('form').reset();
+        }
+    </script>
+</body>
+</html>
