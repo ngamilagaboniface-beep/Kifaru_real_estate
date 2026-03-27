@@ -144,11 +144,17 @@
                         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                             <span class="text-kifaru-green text-lg">📍</span> {{ p.location }}
                         </p>
-                        <div class="flex items-center gap-4 mb-8">
+                        <div class="flex items-center gap-4 mb-8 flex-wrap">
                             <p class="text-kifaru-green font-black text-2xl tracking-tighter">{{ "{:,.0f}".format(p.price) }} <span class="text-[10px] text-slate-400 font-bold uppercase ml-1">TZS</span></p>
+                            
                             {% if p.bedrooms > 0 %}
-                            <span class="h-6 w-[1px] bg-slate-200"></span>
-                            <span class="text-xs font-bold text-slate-500">🛏️ {{ p.bedrooms }} Beds</span>
+                            <span class="hidden sm:block h-6 w-[1px] bg-slate-200"></span>
+                            <span class="text-xs font-bold text-slate-500 whitespace-nowrap">🛏️ {{ p.bedrooms }} Beds</span>
+                            {% endif %}
+                            
+                            {% if p.available_plots %}
+                            <span class="hidden sm:block h-6 w-[1px] bg-slate-200"></span>
+                            <span class="text-xs font-bold text-kifaru-green whitespace-nowrap">Plots: {{ p.available_plots }}</span>
                             {% endif %}
                         </div>
                         
