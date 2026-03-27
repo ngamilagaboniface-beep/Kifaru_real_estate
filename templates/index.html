@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kifaru Real Estate | Dar es Salaam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .bg-kifaru-green { background-color: #10B981; } /* Emerald 500 */
+        .text-kifaru-green { color: #10B981; }
+        .hero-pattern { background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; }
+        .sold-overlay { filter: grayscale(100%); opacity: 0.8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <nav class="bg-white sticky top-0 z-50 border-b border-slate-200 p-4 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-kifaru-green rounded-lg flex items-center justify-center text-white font-black text-xl">K</div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-lg tracking-tight text-slate-900 uppercase leading-none">Kifaru</span>
+                    <span class="text-[10px] font-bold text-kifaru-green uppercase tracking-widest">Real Estate</span>
+                </div>
+            </a>
+            <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <a href="#about" class="hover:text-kifaru-green transition">About</a>
+                <a href="#services" class="hover:text-kifaru-green transition">Services</a>
+                <a href="#properties" class="hover:text-kifaru-green transition">Listings</a>
+                <a href="#contact" class="hover:text-kifaru-green transition">Contact</a>
+            </div>
+            <button onclick="toggleCart()" class="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-kifaru-green transition flex items-center gap-2 shadow-lg">
+                Inquiries <span id="cart-count" class="bg-white text-slate-900 px-2 py-0.5 rounded-full">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <header class="hero-pattern py-32 md:py-48 text-center px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-white/20">
+                <span class="text-yellow-400">★★★★★</span>
+                <span class="text-white text-xs font-bold tracking-widest uppercase">5.0 Rated Agency in Dar es Salaam</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">Your Trusted Property Partner</h1>
+            <p class="text-slate-300 mb-12 text-lg md:text-xl font-light">Find your perfect home, plot, or commercial space with Kifaru Real Estate.</p>
+            
+            <form action="/" method="GET" class="bg-white p-3 rounded-2xl flex flex-col md:flex-row gap-3 shadow-2xl max-w-3xl mx-auto">
+                <input type="text" name="location" placeholder="Search location (e.g., Goba, Mikocheni)..." class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm font-medium border border-transparent focus:border-kifaru-green">
+                <button class="bg-kifaru-green text-white px-10 py-4 rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-emerald-600 transition shadow-lg">Search</button>
+            </form>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<div class="container mx-auto px-6 mt-8 bg-kifaru-green text-white p-4 rounded-xl text-center font-bold text-xs uppercase shadow-lg">{{ messages[0] }}</div>{% endif %}
+    {% endwith %}
+
+    <section id="about" class="py-24 bg-white">
+        <div class="container mx-auto px-6 max-w-5xl text-center">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-6">Local Expertise. Unmatched Trust.</h2>
+            <p class="text-slate-500 leading-relaxed mb-12">Kifaru Real Estate is Dar es Salaam's premier property agency. We pride ourselves on transparency, professionalism, and helping our clients navigate the Tanzanian real estate market with ease. Backed by a flawless 5.0-star rating from our clients.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-slate-100 pt-12">
+                <div><h3 class="text-4xl font-black text-kifaru-green mb-2">5.0</h3><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Star Rating</p></div>
+                <div><h3 class="text-4xl font-black text-kifaru-green mb-2">100+</h3><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Properties Sold</p></div>
+                <div><h3 class="text-4xl font-black text-kifaru-green mb-2">24/7</h3><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Support</p></div>
+                <div><h3 class="text-4xl font-black text-kifaru-green mb-2">100%</h3><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Verified Listings</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold text-slate-900">Our Services</h2>
+                <p class="text-slate-500 mt-4">Comprehensive real estate solutions tailored to your needs.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:border-kifaru-green transition">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-kifaru-green text-2xl mb-6">🏡</div>
+                    <h3 class="font-bold text-lg mb-3">Buying Property</h3>
+                    <p class="text-sm text-slate-500">We guide you through the entire purchasing process with verified properties.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:border-kifaru-green transition">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-kifaru-green text-2xl mb-6">🤝</div>
+                    <h3 class="font-bold text-lg mb-3">Selling Property</h3>
+                    <p class="text-sm text-slate-500">Get the best market value for your property with our vast buyer network.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:border-kifaru-green transition">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-kifaru-green text-2xl mb-6">🏢</div>
+                    <h3 class="font-bold text-lg mb-3">Property Management</h3>
+                    <p class="text-sm text-slate-500">Professional management of rentals, tenants, and maintenance.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:border-kifaru-green transition">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-kifaru-green text-2xl mb-6">📊</div>
+                    <h3 class="font-bold text-lg mb-3">Consultation</h3>
+                    <p class="text-sm text-slate-500">Expert advice on real estate investment and market trends in Tanzania.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="properties" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-900">Featured Listings</h2>
+                    <p class="text-slate-500 mt-2">Explore our hand-picked properties in Dar es Salaam.</p>
+                </div>
+                <div class="flex gap-2 text-xs font-bold uppercase">
+                    <span class="bg-slate-100 px-4 py-2 rounded-lg text-slate-500">All</span>
+                    <span class="bg-white border px-4 py-2 rounded-lg hover:border-kifaru-green cursor-pointer">For Sale</span>
+                    <span class="bg-white border px-4 py-2 rounded-lg hover:border-kifaru-green cursor-pointer">Rentals</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {% for p in properties %}
+                <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 hover:shadow-2xl hover:-translate-y-2 transition duration-300 group {{ 'sold-overlay' if p.status == 'Sold' }}">
+                    <div class="relative h-64">
+                        <img src="{{ p.image_url }}" class="w-full h-full object-cover">
+                        <div class="absolute top-4 left-4 bg-white/95 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest text-slate-900 shadow-sm">{{ p.property_type }}</div>
+                        {% if p.status == 'Sold' %}
+                        <div class="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
+                            <span class="bg-red-600 text-white px-6 py-2 rounded-lg font-black text-xl uppercase tracking-widest shadow-xl">SOLD</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-8">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 flex items-center gap-1">📍 {{ p.location }}</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2 line-clamp-1">{{ p.title }}</h3>
+                        <p class="text-kifaru-green font-black text-2xl mb-6">{{ "{:,.0f}".format(p.price) }} <span class="text-xs text-slate-400 font-bold">TZS</span></p>
+                        
+                        <div class="flex gap-4 mb-6 pb-6 border-b border-slate-100 text-xs text-slate-500 font-semibold">
+                            {% if p.bedrooms > 0 %} <span class="flex items-center gap-1">🛏️ {{ p.bedrooms }} Beds</span> {% endif %}
+                            <span class="flex items-center gap-1">✨ Verified</span>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            {% if p.status == 'Available' %}
+                            <button onclick="addToCart('{{ p.title }}')" class="flex-1 bg-slate-900 text-white py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-kifaru-green transition">Inquire</button>
+                            {% else %}
+                            <button disabled class="flex-1 bg-slate-100 text-slate-400 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest cursor-not-allowed">Unavailable</button>
+                            {% endif %}
+                            <button onclick="alert('Link copied to clipboard!')" class="p-4 bg-slate-50 border rounded-xl hover:bg-slate-100 text-slate-600" title="Share via Social Media">🔗</button>
+                            <button onclick="alert('Property details sent to your phone!')" class="p-4 bg-slate-50 border rounded-xl hover:bg-slate-100 text-slate-600" title="Send to Phone">📱</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-slate-900 text-white">
+        <div class="container mx-auto px-6 text-center max-w-4xl">
+            <h2 class="text-3xl font-extrabold mb-12">What Our Clients Say</h2>
+            <div class="bg-slate-800 p-10 rounded-3xl border border-slate-700 relative">
+                <div class="text-yellow-400 text-2xl mb-4">★★★★★</div>
+                <p class="text-lg font-light text-slate-300 italic mb-6">"Kifaru Real Estate made finding my plot in Goba incredibly easy. Their professionalism and transparency are unmatched in Dar es Salaam. Highly recommended!"</p>
+                <p class="font-bold text-sm tracking-widest uppercase text-kifaru-green">- Emmanuel S.</p>
+                <p class="text-xs text-slate-500 mt-1">Verified Buyer</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="border-t border-slate-200">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+            <div class="h-[400px] lg:h-auto bg-slate-200 relative">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126743.58585976527!2d39.1722709!3d-6.792354!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x185c4bae169bd6f1%3A0x320f2cb016dcb7cb!2sDar%20es%20Salaam%2C%20Tanzania!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+            
+            <div class="p-12 md:p-24 bg-white">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-8">Get In Touch</h2>
+                
+                <div class="space-y-6 mb-12">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-kifaru-green rounded-lg flex items-center justify-center text-xl">📍</div>
+                        <div><p class="font-bold text-slate-900">Address</p><p class="text-slate-500 text-sm">Njia nne, Goba Rd, Dar es Salaam</p></div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-kifaru-green rounded-lg flex items-center justify-center text-xl">📞</div>
+                        <div><p class="font-bold text-slate-900">Phone</p><p class="text-slate-500 text-sm">0713 860 510</p></div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-kifaru-green rounded-lg flex items-center justify-center text-xl">⏰</div>
+                        <div><p class="font-bold text-slate-900">Business Hours</p><p class="text-slate-500 text-sm">Open: 8:00 AM - Closes at 5:00 PM (Mon-Sat)</p></div>
+                    </div>
+                </div>
+
+                <form class="space-y-4">
+                    <input type="text" placeholder="Your Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-kifaru-green">
+                    <input type="email" placeholder="Your Email" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-kifaru-green">
+                    <textarea placeholder="Your Message" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-kifaru-green h-32"></textarea>
+                    <button type="button" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-kifaru-green transition">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-[400px] bg-white shadow-2xl z-[100] transform translate-x-full transition-transform duration-500 p-10 border-l border-slate-100 overflow-y-auto">
+        <div class="flex justify-between items-center mb-12 border-b pb-6">
+            <h2 class="font-black text-xl text-slate-900 uppercase tracking-tight">Property Inquiries</h2>
+            <button onclick="toggleCart()" class="text-slate-400 hover:text-red-500 text-2xl font-light">&times;</button>
+        </div>
+        <div id="cart-items" class="space-y-3 mb-8"></div>
+        <form action="/send_inquiry" method="POST" class="space-y-5 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+            <input type="hidden" name="cart_data" id="cart_data">
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+                <input type="text" name="name" required class="w-full p-4 mt-1 bg-white border border-slate-200 rounded-xl outline-none focus:border-kifaru-green text-sm">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Phone Number</label>
+                <input type="text" name="phone" required class="w-full p-4 mt-1 bg-white border border-slate-200 rounded-xl outline-none focus:border-kifaru-green text-sm">
+            </div>
+            <button type="submit" class="w-full bg-kifaru-green text-white py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg hover:bg-emerald-600 transition">Submit Request</button>
+        </form>
+    </div>
+
+    <footer class="bg-white py-12 text-center border-t border-slate-100">
+        <div class="flex items-center justify-center gap-2 mb-4">
+            <div class="w-8 h-8 bg-slate-900 rounded-md flex items-center justify-center text-white font-black">K</div>
+            <span class="font-extrabold text-slate-900 uppercase tracking-tight">Kifaru Real Estate</span>
+        </div>
+        <p class="text-slate-400 text-xs font-semibold mb-6">Your Trusted Property Partner in Dar es Salaam</p>
+        <div class="flex justify-center gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <a href="/login" class="hover:text-kifaru-green transition">Agent Login</a>
+            <a href="https://wa.me/255713860510" class="hover:text-kifaru-green transition">WhatsApp: 0713 860 510</a>
+        </div>
+    </footer>
+
+    <script>
+        let cart = [];
+        function addToCart(t) { if(!cart.includes(t)) { cart.push(t); updateUI(); toggleCart(); } }
+        function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('translate-x-full'); }
+        function updateUI() {
+            const container = document.getElementById('cart-items');
+            document.getElementById('cart-count').innerText = cart.length;
+            document.getElementById('cart_data').value = cart.join(', ');
+            container.innerHTML = cart.map(item => `<div class="bg-white p-4 rounded-xl flex justify-between items-center border border-slate-100 shadow-sm"><span class="font-bold text-xs text-slate-700 line-clamp-1">${item}</span><button onclick="rm('${item}')" class="text-slate-300 hover:text-red-500 font-black ml-4">&times;</button></div>`).join('');
+        }
+        function rm(t) { cart = cart.filter(i => i !== t); updateUI(); }
+    </script>
+</body>
+</html>
