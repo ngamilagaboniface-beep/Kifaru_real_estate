@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kifaru | Agent Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-kifaru-green { background-color: #10B981; }
+        .text-kifaru-green { color: #10B981; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
+
+    <div class="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
+        
+        <div class="text-center mb-10">
+            <a href="/" class="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition">
+                <div class="w-12 h-12 bg-kifaru-green rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">K</div>
+            </a>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight uppercase">Agent Portal</h1>
+            <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase mt-2">Kifaru Real Estate Management</p>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="bg-red-50 border border-red-100 text-red-500 p-4 rounded-xl text-center text-xs font-bold uppercase tracking-widest mb-6">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2">Username</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-300">👤</span>
+                    <input type="text" name="username" required placeholder="admin" 
+                           class="w-full pl-12 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-kifaru-green text-sm font-semibold transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-300">🔒</span>
+                    <input type="password" name="password" required placeholder="••••••••" 
+                           class="w-full pl-12 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-kifaru-green text-sm font-semibold transition">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg hover:bg-kifaru-green transition-colors duration-300 mt-4">
+                Secure Login
+            </button>
+        </form>
+
+        <div class="mt-8 text-center border-t border-slate-100 pt-6">
+            <a href="/" class="text-[10px] font-bold text-slate-400 hover:text-kifaru-green uppercase tracking-widest transition">
+                ← Return to Main Website
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
