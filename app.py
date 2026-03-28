@@ -12,12 +12,14 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'KIFARU_ESTATE_2026')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'kifaru_real_estate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
-# File Upload Configuration
+# Upload Folder Setup
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True) # Creates the folder safely
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True) 
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -40,7 +42,6 @@ class Property(db.Model):
     price = db.Column(db.Float)
     bedrooms = db.Column(db.Integer, default=0)
     available_plots = db.Column(db.String(300), default="") 
-    features = db.Column(db.String(200)) 
     image_url = db.Column(db.String(500))
     status = db.Column(db.String(20), default='Available') 
 
@@ -55,7 +56,6 @@ class Inquiry(db.Model):
 @login_manager.user_loader
 def load_user(id): return User.query.get(int(id))
 
-# Initialize Database
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
@@ -75,13 +75,12 @@ def index():
 def send_inquiry():
     new_inq = Inquiry(
         customer_name=request.form.get('name'),
-        customer_email=request.form.get('email'),
         customer_phone=request.form.get('phone'),
         selected_plots=request.form.get('cart_data')
     )
     db.session.add(new_inq)
     db.session.commit()
-    flash('Thank you! Kifaru Real Estate will contact you shortly.')
+    flash('Inquiry Sent! Kifaru Real Estate will call you.')
     return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -91,7 +90,7 @@ def login():
         if user and user.password == request.form.get('password'):
             login_user(user)
             return redirect(url_for('admin_dashboard'))
-        flash('Invalid Credentials')
+        flash('Access Denied.')
     return render_template('login.html')
 
 @app.route('/admin')
@@ -106,60 +105,38 @@ def admin_dashboard():
 def save_property():
     try:
         p_id = request.form.get('property_id')
-        
-        # 1. Handle File Upload Safely
         image_file = request.files.get('image_file')
         image_url = request.form.get('image_url') 
         
-        # Check if a real file was uploaded, not just an empty submission
         if image_file and image_file.filename != '' and allowed_file(image_file.filename):
             filename = secure_filename(image_file.filename)
-            unique_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-            image_file.save(filepath)
-            image_url = f"/static/uploads/{unique_filename}"
+            unique_name = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+            image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
+            image_url = f"/static/uploads/{unique_name}"
 
-        # 2. Safely Convert Numbers (prevents crashing on empty inputs)
-        try:
-            price_val = float(request.form.get('price') or 0)
-        except ValueError:
-            price_val = 0.0
+        data = {
+            "title": request.form.get('title'),
+            "location": request.form.get('location'),
+            "property_type": request.form.get('type'),
+            "price": float(request.form.get('price') or 0),
+            "bedrooms": int(request.form.get('bedrooms') or 0),
+            "available_plots": request.form.get('available_plots', ''),
+            "status": request.form.get('status')
+        }
 
-        try:
-            beds_val = int(request.form.get('bedrooms') or 0)
-        except ValueError:
-            beds_val = 0
-
-        # 3. Save to Database
-        if p_id: 
+        if p_id:
             p = Property.query.get(p_id)
-            p.title = request.form.get('title')
-            p.location = request.form.get('location')
-            p.property_type = request.form.get('type')
-            p.price = price_val
-            p.bedrooms = beds_val
-            p.available_plots = request.form.get('available_plots', '')
-            if image_url: p.image_url = image_url 
-            p.status = request.form.get('status')
-        else: 
-            new_p = Property(
-                title=request.form.get('title'), 
-                location=request.form.get('location'), 
-                property_type=request.form.get('type'), 
-                price=price_val, 
-                bedrooms=beds_val, 
-                available_plots=request.form.get('available_plots', ''),
-                image_url=image_url or "https://via.placeholder.com/600x400?text=No+Image", 
-                status=request.form.get('status')
-            )
+            for key, value in data.items(): setattr(p, key, value)
+            if image_url: p.image_url = image_url
+        else:
+            new_p = Property(**data, image_url=image_url or "https://via.placeholder.com/600x400")
             db.session.add(new_p)
         
         db.session.commit()
-        
+        flash("Success!")
     except Exception as e:
-        # If something goes wrong, print it in the terminal instead of crashing the site
-        print(f"CRITICAL ERROR SAVING: {str(e)}")
-        
+        db.session.rollback()
+        flash(f"Error: {str(e)}")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete/<int:id>', methods=['POST'])
