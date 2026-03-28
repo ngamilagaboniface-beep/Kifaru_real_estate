@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # File Upload Configuration
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True) # Creates the folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True) # Creates the folder safely
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 db = SQLAlchemy(app)
@@ -39,7 +39,7 @@ class Property(db.Model):
     title = db.Column(db.String(150))
     price = db.Column(db.Float)
     bedrooms = db.Column(db.Integer, default=0)
-    available_plots = db.Column(db.String(300), default="") # NEW: Plot Manager Field
+    available_plots = db.Column(db.String(300), default="") 
     features = db.Column(db.String(200)) 
     image_url = db.Column(db.String(500))
     status = db.Column(db.String(20), default='Available') 
@@ -97,51 +97,69 @@ def login():
 @app.route('/admin')
 @login_required
 def admin_dashboard():
-    properties = Property.query.all()
+    properties = Property.query.order_by(Property.id.desc()).all()
     inquiries = Inquiry.query.order_by(Inquiry.timestamp.desc()).all()
     return render_template('admin.html', properties=properties, inquiries=inquiries)
 
 @app.route('/admin/save', methods=['POST'])
 @login_required
 def save_property():
-    p_id = request.form.get('property_id')
-    
-    # 1. Handle File Upload
-    image_file = request.files.get('image_file')
-    image_url = request.form.get('image_url') # Fallback if URL is pasted
-    
-    if image_file and allowed_file(image_file.filename):
-        filename = secure_filename(image_file.filename)
-        # Add timestamp to make filename unique
-        unique_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
-        image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
-        image_url = f"/static/uploads/{unique_filename}"
+    try:
+        p_id = request.form.get('property_id')
+        
+        # 1. Handle File Upload Safely
+        image_file = request.files.get('image_file')
+        image_url = request.form.get('image_url') 
+        
+        # Check if a real file was uploaded, not just an empty submission
+        if image_file and image_file.filename != '' and allowed_file(image_file.filename):
+            filename = secure_filename(image_file.filename)
+            unique_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            image_file.save(filepath)
+            image_url = f"/static/uploads/{unique_filename}"
 
-    # 2. Save or Update Database
-    if p_id: 
-        p = Property.query.get(p_id)
-        p.title = request.form.get('title')
-        p.location = request.form.get('location')
-        p.property_type = request.form.get('type')
-        p.price = float(request.form.get('price'))
-        p.bedrooms = int(request.form.get('bedrooms') or 0)
-        p.available_plots = request.form.get('available_plots', '')
-        if image_url: p.image_url = image_url # Only update image if a new one is provided
-        p.status = request.form.get('status')
-    else: 
-        new_p = Property(
-            title=request.form.get('title'), 
-            location=request.form.get('location'), 
-            property_type=request.form.get('type'), 
-            price=float(request.form.get('price')), 
-            bedrooms=int(request.form.get('bedrooms') or 0), 
-            available_plots=request.form.get('available_plots', ''),
-            image_url=image_url or "https://via.placeholder.com/600x400?text=No+Image", 
-            status=request.form.get('status')
-        )
-        db.session.add(new_p)
-    
-    db.session.commit()
+        # 2. Safely Convert Numbers (prevents crashing on empty inputs)
+        try:
+            price_val = float(request.form.get('price') or 0)
+        except ValueError:
+            price_val = 0.0
+
+        try:
+            beds_val = int(request.form.get('bedrooms') or 0)
+        except ValueError:
+            beds_val = 0
+
+        # 3. Save to Database
+        if p_id: 
+            p = Property.query.get(p_id)
+            p.title = request.form.get('title')
+            p.location = request.form.get('location')
+            p.property_type = request.form.get('type')
+            p.price = price_val
+            p.bedrooms = beds_val
+            p.available_plots = request.form.get('available_plots', '')
+            if image_url: p.image_url = image_url 
+            p.status = request.form.get('status')
+        else: 
+            new_p = Property(
+                title=request.form.get('title'), 
+                location=request.form.get('location'), 
+                property_type=request.form.get('type'), 
+                price=price_val, 
+                bedrooms=beds_val, 
+                available_plots=request.form.get('available_plots', ''),
+                image_url=image_url or "https://via.placeholder.com/600x400?text=No+Image", 
+                status=request.form.get('status')
+            )
+            db.session.add(new_p)
+        
+        db.session.commit()
+        
+    except Exception as e:
+        # If something goes wrong, print it in the terminal instead of crashing the site
+        print(f"CRITICAL ERROR SAVING: {str(e)}")
+        
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete/<int:id>', methods=['POST'])
